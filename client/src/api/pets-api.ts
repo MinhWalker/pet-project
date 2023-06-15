@@ -5,9 +5,9 @@ import Axios from 'axios'
 import { UpdatePetRequest } from '../types/UpdatePetRequest';
 
 export async function getPets(idToken: string): Promise<Pet[]> {
-  console.log('Fetching todos')
+  console.log('Fetching pets')
 
-  const response = await Axios.get(`${apiEndpoint}/todos`, {
+  const response = await Axios.get(`${apiEndpoint}/pets`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`
@@ -21,7 +21,7 @@ export async function createPet(
   idToken: string,
   newPet: CreatePetRequest
 ): Promise<Pet> {
-  const response = await Axios.post(`${apiEndpoint}/todos`,  JSON.stringify(newPet), {
+  const response = await Axios.post(`${apiEndpoint}/pets`,  JSON.stringify(newPet), {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`
@@ -32,10 +32,10 @@ export async function createPet(
 
 export async function patchPet(
   idToken: string,
-  todoId: string,
+  petId: string,
   updatedPet: UpdatePetRequest
 ): Promise<void> {
-  await Axios.patch(`${apiEndpoint}/todos/${todoId}`, JSON.stringify(updatedPet), {
+  await Axios.patch(`${apiEndpoint}/pets/${petId}`, JSON.stringify(updatedPet), {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`
@@ -45,9 +45,9 @@ export async function patchPet(
 
 export async function deletePet(
   idToken: string,
-  todoId: string
+  petId: string
 ): Promise<void> {
-  await Axios.delete(`${apiEndpoint}/todos/${todoId}`, {
+  await Axios.delete(`${apiEndpoint}/pets/${petId}`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`
@@ -57,9 +57,9 @@ export async function deletePet(
 
 export async function getUploadUrl(
   idToken: string,
-  todoId: string
+  petId: string
 ): Promise<string> {
-  const response = await Axios.post(`${apiEndpoint}/todos/${todoId}/attachment`, '', {
+  const response = await Axios.post(`${apiEndpoint}/pets/${petId}/attachment`, '', {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`

@@ -104,7 +104,7 @@ export class Pets extends React.PureComponent<PetsProps, PetsState> {
   render() {
     return (
       <div>
-        <Header as="h1">TODOs</Header>
+        <Header as="h1">PETs</Header>
 
         {this.renderCreatePetInput()}
 
@@ -122,7 +122,7 @@ export class Pets extends React.PureComponent<PetsProps, PetsState> {
               color: 'teal',
               labelPosition: 'left',
               icon: 'add',
-              content: 'New task',
+              content: 'New pet',
               onClick: this.onPetCreate
             }}
             fluid
@@ -150,7 +150,7 @@ export class Pets extends React.PureComponent<PetsProps, PetsState> {
     return (
       <Grid.Row>
         <Loader indeterminate active inline="centered">
-          Loading TODOs
+          Loading PETs
         </Loader>
       </Grid.Row>
     )
