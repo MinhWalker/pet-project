@@ -23,6 +23,7 @@ export class PetsAccess {
 		this.petDocument = new XAWS.DynamoDB.DocumentClient();
 	}
 
+	// TODO: create pet
   public async createPet(pet: PetItem): Promise<PetItem> {
 		logger.info("Ready to add a new pet")
 
@@ -36,6 +37,7 @@ export class PetsAccess {
 		return pet;
 	}
 
+	// TODO: create attachment upload images
 	public async createAttachmentPresignedUrl(userId: string, petId: string, attachmentId: string) {
 		const attachmentUtil = new AttachmentUtils();
 		const attachmentUrl = `https://${this.bucketName}.s3.amazonaws.com/${attachmentId}`;
@@ -63,6 +65,7 @@ export class PetsAccess {
 		}
 	}
 
+	// TODO: Get all pets for user
 	public async getPets(userId: string) : Promise<PetItem[]> {
 		if (userId) {
 				logger.info("Ready to get all pets");
@@ -86,6 +89,8 @@ export class PetsAccess {
 				logger.error(`Unauthenticated operation`);
 		}
 	}
+
+	// TODO: Update pet
 	public async updatePet(userId: string, petId: string, pet: PetUpdate) {
 		if (userId) {
 				logger.info(`Found pet ${petId}, ready for update`);
@@ -115,6 +120,66 @@ export class PetsAccess {
 		}
 }
 
+// TODO: Get pet by ID
+public async getPetById(userId: string, petId: string): Promise<PetItem> {
+  if (userId) {
+    logger.info(`Ready to get pet with ID: ${petId}`);
+
+    const pets = await this.petDocument.query({
+      TableName: this.petTable,
+      KeyConditionExpression: "#petId = :petId AND #userId = :userId",
+      ExpressionAttributeNames: {
+        "#petId": "petId",
+        "#userId": "userId"
+      },
+      ExpressionAttributeValues: {
+        ":petId": petId,
+        ":userId": userId
+      }
+    }).promise();
+
+    if (pets.Items && pets.Items.length > 0) {
+      const pet = pets.Items[0] as PetItem;
+      logger.info(`Retrieved pet with ID: ${petId}`);
+      return pet;
+    } else {
+      logger.warn(`Pet with ID ${petId} not found`);
+    }
+  } else {
+    logger.error(`Unauthenticated operation`);
+  }
+}
+
+// TODO: Search pet by name
+public async searchPetsByName(userId: string, name: string): Promise<PetItem[]> {
+  if (userId) {
+    logger.info(`Ready to search pets by name: ${name}`);
+
+    const pets = await this.petDocument.query({
+      TableName: this.petTable,
+      IndexName: this.petsCreatedAtIndex,
+      KeyConditionExpression: "#userId = :userId",
+      FilterExpression: "contains(#name, :name)",
+      ExpressionAttributeNames: {
+        "#userId": "userId",
+        "#name": "name"
+      },
+      ExpressionAttributeValues: {
+        ":userId": userId,
+        ":name": name
+      }
+    }).promise();
+
+    logger.info(`Query successfully for pets with name: ${name}`);
+
+    return pets.Items as PetItem[];
+  } else {
+    logger.error(`Unauthenticated operation`);
+    return [];
+  }
+}
+
+// TODO: delete pet
 public async deletePet(userId: string, petId: string) {
 		if (userId) {
 				logger.info(`Ready to delete pet ${petId}`);
