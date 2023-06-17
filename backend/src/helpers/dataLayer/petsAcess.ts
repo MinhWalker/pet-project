@@ -151,11 +151,14 @@ public async getPetById(userId: string, petId: string): Promise<PetItem> {
 }
 
 // TODO: Search pet by name
-public async searchPetsByName(userId: string, name: string): Promise<PetItem[]> {
+public async searchPetsByName(userId: string, name: string, page: number, limit: number): Promise<PetItem[]> {
   if (userId) {
     logger.info(`Ready to search pets by name: ${name}`);
 
-    const pets = await this.petDocument.query({
+    const pageSize = limit || 10; // Default page size to 10 if not provided
+    const startIndex = (page - 1) * pageSize; // Calculate the start index based on the page number
+
+    const params = {
       TableName: this.petTable,
       IndexName: this.petsCreatedAtIndex,
       KeyConditionExpression: "#userId = :userId",
@@ -167,12 +170,26 @@ public async searchPetsByName(userId: string, name: string): Promise<PetItem[]> 
       ExpressionAttributeValues: {
         ":userId": userId,
         ":name": name
-      }
-    }).promise();
+      },
+      Limit: pageSize,
+      ScanIndexForward: true,
+      ExclusiveStartKey: undefined
+    };
+
+    // Set the ExclusiveStartKey to paginate results starting from the provided start index
+    if (startIndex > 0) {
+      const pets = await this.petDocument.query(params).promise();
+      params.ExclusiveStartKey = {
+        userId: userId,
+        petId: pets.Items[startIndex - 1].petId // Set the last evaluated petId as the ExclusiveStartKey
+      };
+    }
+
+    const result = await this.petDocument.query(params).promise();
 
     logger.info(`Query successfully for pets with name: ${name}`);
 
-    return pets.Items as PetItem[];
+    return result.Items as PetItem[];
   } else {
     logger.error(`Unauthenticated operation`);
     return [];

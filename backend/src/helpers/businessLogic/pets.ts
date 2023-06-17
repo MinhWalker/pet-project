@@ -44,8 +44,8 @@ export const getPetByID = async (userId: string, petId: string) => {
   return await petAccessLayer.getPetById(userId, petId);
 }
 
-export const searchPetsByName = async (userId: string, name: string) => {
-  return await petAccessLayer.searchPetsByName(userId, name);
+export const searchPetsByName = async (userId: string, name: string, page: number, limit: number) => {
+  return await petAccessLayer.searchPetsByName(userId, name, page, limit);
 }
 
 export const deletePet = async (userId: string, petId: string) => {

@@ -88,6 +88,13 @@ functions:
           path: pets/search/{name}
           cors: true
           authorizer: Auth
+          request:
+            parameters:
+              paths:
+                name: true
+              querystrings:
+                page: false
+                limit: false
     iamRoleStatements:
       - Effect: Allow
         Action:
