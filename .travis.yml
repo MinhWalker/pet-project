@@ -1,6 +1,6 @@
 language: node.js
 node_js:
-  - "12"
+  - "14"
 
 install:
   - npm install -g serverless
@@ -10,4 +10,5 @@ before_install: cd backend
 
 script:
   - serverless config credentials --provider aws --key "$AWS_ACCESS_KEY_ID" --secret "$AWS_SECRET_ACCESS_KEY" --sessionToken "$AWS_SESSION_TOKEN" --profile "$AWS_PROFILE"
+  - serverless plugin install -n serverless-webpack
   - serverless deploy --aws-profile "$AWS_PROFILE"
