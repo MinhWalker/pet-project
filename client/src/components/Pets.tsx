@@ -13,6 +13,7 @@ import {
   Image,
   Loader
 } from 'semantic-ui-react'
+import styled from 'styled-components'
 
 import { createPet, deletePet, getPets, patchPet, searchPetsByName } from '../api/pets-api'
 import Auth from '../auth/Auth'
@@ -97,6 +98,16 @@ export class Pets extends React.PureComponent<PetsProps, PetsState> {
 
   onSearchPets = async (name: string) => {
     try {
+      if (!name) {
+        const pets = await getPets(
+          this.props.auth.getIdToken(),
+        )
+        this.setState({
+          pets,
+          loadingPets: false
+        })
+        return null
+      }
       const pets = await searchPetsByName(
         this.props.auth.getIdToken(),
         name,
@@ -110,6 +121,10 @@ export class Pets extends React.PureComponent<PetsProps, PetsState> {
     } catch (e) {
       alert(`Failed to fetch pets: ${(e as Error).message}`)
     }
+  }
+
+  onPetDetails = (petId: string) => {
+    this.props.history.push(`/pets/${petId}`)
   }
 
   async componentDidMount() {
@@ -209,50 +224,48 @@ export class Pets extends React.PureComponent<PetsProps, PetsState> {
 
   renderPetsList() {
     return (
-      <Grid padded>
+      <Wrapper>
         {this.state.pets.map((pet, pos) => {
           return (
-            <Grid.Row key={pet.petId}>
-              <Grid.Column width={1} verticalAlign="middle">
-                <Checkbox
-                  onChange={() => this.onPetCheck(pos)}
-                  checked={pet.done}
-                />
-              </Grid.Column>
-              <Grid.Column width={10} verticalAlign="middle">
-                {pet.name}
-              </Grid.Column>
-              <Grid.Column width={3} floated="right">
-                {pet.dueDate}
-              </Grid.Column>
-              <Grid.Column width={1} floated="right">
-                <Button
-                  icon
-                  color="blue"
-                  onClick={() => this.onEditButtonClick(pet.petId)}
-                >
-                  <Icon name="pencil" />
-                </Button>
-              </Grid.Column>
-              <Grid.Column width={1} floated="right">
-                <Button
-                  icon
-                  color="red"
-                  onClick={() => this.onPetDelete(pet.petId)}
-                >
-                  <Icon name="delete" />
-                </Button>
-              </Grid.Column>
-              {pet.attachmentUrl && (
-                <Image src={pet.attachmentUrl} size="small" wrapped />
-              )}
-              <Grid.Column width={16}>
-                <Divider />
-              </Grid.Column>
-            </Grid.Row>
+            <WrapperItem key={pos}>
+              <Item>
+                <ItemTitle>
+                  <Checkbox
+                    onChange={() => this.onPetCheck(pos)}
+                    checked={pet.done}
+                  />
+                  <ItemName onClick={() => { this.onPetDetails(pet.petId) }}>{pet.name}</ItemName>
+                </ItemTitle>
+                <ItemControl>
+                  <span>{pet.dueDate}</span>
+                  <div>
+                    <Button
+                      icon
+                      color="blue"
+                      onClick={() => this.onEditButtonClick(pet.petId)}
+                    >
+                      <Icon name="pencil" />
+                    </Button>
+                    <Button
+                      icon
+                      color="red"
+                      onClick={() => this.onPetDelete(pet.petId)}
+                    >
+                      <Icon name="delete" />
+                    </Button>
+                  </div>
+                </ItemControl>
+              </Item>
+              <ItemImage onClick={() => { this.onPetDetails(pet.petId) }}>
+                {pet.attachmentUrl && (
+                  <Image src={pet.attachmentUrl} size="small" wrapped />
+                )}
+              </ItemImage>
+              <Divider />
+            </WrapperItem>
           )
         })}
-      </Grid>
+      </Wrapper>
     )
   }
 
@@ -263,3 +276,42 @@ export class Pets extends React.PureComponent<PetsProps, PetsState> {
     return dateFormat(date, 'yyyy-mm-dd') as string
   }
 }
+
+const Wrapper = styled.div`
+  display: 'flex',
+  flexDirection: 'column',
+`
+
+const WrapperItem = styled.div`
+  display: 'flex',
+  flexDirection: 'column'
+`
+
+const Item = styled.div(() => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+}))
+
+const ItemName = styled.p(() => ({
+  cursor: 'pointer',
+  ":hover": {
+    color: '#42f5a1'
+  }
+}))
+
+const ItemImage = styled.div(() => ({
+  cursor: 'pointer',
+}))
+
+const ItemTitle = styled.div(() => ({
+  display: 'flex',
+  columnGap: '8px',
+  alignItems: 'center',
+}))
+
+const ItemControl = styled.div(() => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  columnGap: '8px',
+  alignItems: 'center',
+}))

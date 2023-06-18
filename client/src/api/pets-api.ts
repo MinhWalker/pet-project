@@ -101,5 +101,5 @@ export async function getPetById(idToken: string, petId: string): Promise<Pet> {
       Authorization: `Bearer ${idToken}`,
     },
   });
-  return response.data.item;
+  return response.data.items;
 }

@@ -7,6 +7,7 @@ import { EditPet } from './components/EditPet'
 import { LogIn } from './components/LogIn'
 import { NotFound } from './components/NotFound'
 import { Pets } from './components/Pets'
+import { PetDetails } from './components/PetDetails'
 
 export interface AppProps {}
 
@@ -93,6 +94,14 @@ export default class App extends Component<AppProps, AppState> {
           exact
           render={props => {
             return <Pets {...props} auth={this.props.auth} />
+          }}
+        />
+
+      <Route
+          path="/pets/:petId"
+          exact
+          render={props => {
+            return <PetDetails {...props} auth={this.props.auth} />
           }}
         />
 
