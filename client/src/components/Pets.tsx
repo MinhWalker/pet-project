@@ -14,7 +14,7 @@ import {
   Loader
 } from 'semantic-ui-react'
 
-import { createPet, deletePet, getPets, patchPet } from '../api/pets-api'
+import { createPet, deletePet, getPets, patchPet, searchPetsByName } from '../api/pets-api'
 import Auth from '../auth/Auth'
 import { Pet } from '../types/Pet'
 
@@ -27,17 +27,23 @@ interface PetsState {
   pets: Pet[]
   newPetName: string
   loadingPets: boolean
+  searchName: string
 }
 
 export class Pets extends React.PureComponent<PetsProps, PetsState> {
   state: PetsState = {
     pets: [],
     newPetName: '',
-    loadingPets: true
+    loadingPets: true,
+    searchName: ''
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ newPetName: event.target.value })
+  }
+
+  handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ searchName: event.target.value })
   }
 
   onEditButtonClick = (petId: string) => {
@@ -89,6 +95,23 @@ export class Pets extends React.PureComponent<PetsProps, PetsState> {
     }
   }
 
+  onSearchPets = async (name: string) => {
+    try {
+      const pets = await searchPetsByName(
+        this.props.auth.getIdToken(),
+        name,
+        1, // page number (modify as needed)
+        10 // limit (modify as needed)
+      )
+      this.setState({
+        pets,
+        loadingPets: false
+      })
+    } catch (e) {
+      alert(`Failed to fetch pets: ${(e as Error).message}`)
+    }
+  }
+
   async componentDidMount() {
     try {
       const pets = await getPets(this.props.auth.getIdToken())
@@ -107,6 +130,7 @@ export class Pets extends React.PureComponent<PetsProps, PetsState> {
         <Header as="h1">PETs</Header>
 
         {this.renderCreatePetInput()}
+        {this.renderSearchInput()}
 
         {this.renderPets()}
       </div>
@@ -129,6 +153,33 @@ export class Pets extends React.PureComponent<PetsProps, PetsState> {
             actionPosition="left"
             placeholder="To change the world..."
             onChange={this.handleNameChange}
+            value={this.state.newPetName}
+          />
+        </Grid.Column>
+        <Grid.Column width={16}>
+          <Divider />
+        </Grid.Column>
+      </Grid.Row>
+    )
+  }
+
+  renderSearchInput() {
+    return (
+      <Grid.Row>
+        <Grid.Column width={16}>
+          <Input
+            action={{
+              color: 'teal',
+              labelPosition: 'left',
+              icon: 'search',
+              content: 'Search',
+              onClick: () => this.onSearchPets(this.state.searchName)
+            }}
+            fluid
+            actionPosition="left"
+            placeholder="Search pets by name..."
+            onChange={this.handleSearchChange}
+            value={this.state.searchName}
           />
         </Grid.Column>
         <Grid.Column width={16}>

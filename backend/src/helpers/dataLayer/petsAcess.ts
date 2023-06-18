@@ -158,23 +158,27 @@ public async searchPetsByName(userId: string, name: string, page: number, limit:
     const pageSize = limit || 10; // Default page size to 10 if not provided
     const startIndex = (page - 1) * pageSize; // Calculate the start index based on the page number
 
-    const params = {
-      TableName: this.petTable,
-      IndexName: this.petsCreatedAtIndex,
-      KeyConditionExpression: "#userId = :userId",
-      FilterExpression: "contains(#name, :name)",
-      ExpressionAttributeNames: {
-        "#userId": "userId",
-        "#name": "name"
-      },
-      ExpressionAttributeValues: {
-        ":userId": userId,
-        ":name": name
-      },
-      Limit: pageSize,
-      ScanIndexForward: true,
-      ExclusiveStartKey: undefined
-    };
+    let params: DocumentClient.QueryInput = {
+			TableName: this.petTable,
+			IndexName: this.petsCreatedAtIndex,
+			KeyConditionExpression: "#userId = :userId",
+			ExpressionAttributeNames: {
+				"#userId": "userId",
+			},
+			ExpressionAttributeValues: {
+				":userId": userId,
+			},
+			Limit: pageSize,
+			ScanIndexForward: true,
+			ExclusiveStartKey: undefined
+	  };
+  
+	  // Check if the name is provided
+	  if (name && name.trim() !== "") {
+			params.FilterExpression = "contains(#name, :name)";
+			params.ExpressionAttributeNames["#name"] = "name";
+			params.ExpressionAttributeValues[":name"] = name;
+	  }
 
     // Set the ExclusiveStartKey to paginate results starting from the provided start index
     if (startIndex > 0) {

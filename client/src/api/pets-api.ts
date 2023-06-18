@@ -71,3 +71,35 @@ export async function getUploadUrl(
 export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void> {
   await Axios.put(uploadUrl, file)
 }
+
+export async function searchPetsByName(
+  idToken: string,
+  name: string,
+  page: number,
+  limit: number
+): Promise<Pet[]> {
+  const pageSize = limit || 10; // Default page size to 10 if not provided
+
+  const response = await Axios.get(`${apiEndpoint}/pets/search/${name}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${idToken}`,
+    },
+    params: {
+      page: page,
+      limit: pageSize,
+    },
+  });
+
+  return response.data.items;
+}
+
+export async function getPetById(idToken: string, petId: string): Promise<Pet> {
+  const response = await Axios.get(`${apiEndpoint}/pets/${petId}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${idToken}`,
+    },
+  });
+  return response.data.item;
+}
